@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium 8x8 Dot Grid</title>
+    <style>
+        :root {
+            --grid-bg: #f8f8f8;
+            --dot-color: #333;
+            --dot-hover: #007AFF;
+            --dot-active: #0056b3;
+            --line-color: #007AFF;
+            --line-shadow: rgba(0, 122, 255, 0.4);
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--grid-bg);
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .title {
+            color: #333;
+            font-weight: 500;
+            font-size: 24px;
+            margin: 0;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 15px;
+            position: relative;
+            padding: 30px;
+            background-color: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 
+                        0 1px 3px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .grid:hover {
+            transform: translateY(-5px);
+        }
+        
+        .dot {
+            width: 18px;
+            height: 18px;
+            background-color: var(--dot-color);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            margin: auto;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        background-color 0.3s ease, 
+                        box-shadow 0.3s ease;
+        }
+        
+        .dot:hover {
+            transform: scale(1.4);
+            background-color: var(--dot-hover);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2);
+        }
+        
+        .dot.active {
+            background-color: var(--dot-active);
+            transform: scale(1.5);
+            box-shadow: 0 0 0 6px rgba(0, 122, 255, 0.3);
+        }
+        
+        .line {
+            position: absolute;
+            background-color: var(--line-color);
+            height: 4px;
+            border-radius: 2px;
+            transform-origin: left center;
+            transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        opacity 0.4s ease;
+            box-shadow: 0 0 10px var(--line-shadow);
+            z-index: -1;
+        }
+        
+        .button {
+            background-color: var(--dot-hover);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.4);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.5);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(0, 122, 255, 0.4);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .line.pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Interactive Grid</h1>
+        <div class="grid" id="grid"></div>
+        <button class="button" id="clearButton">Clear All</button>
+    </div>
+    
+    <script>
+        const grid = document.getElementById("grid");
+        const clearButton = document.getElementById("clearButton");
+        let selectedDots = [];
+        let isDrawing = false;
+        let lines = [];
+        
+        // Create dots with staggered animation
+        for (let i = 0; i < 64; i++) {
+            let dot = document.createElement("div");
+            dot.className = "dot";
+            dot.dataset.index = i;
+            dot.style.opacity = "0";
+            grid.appendChild(dot);
+            
+            // Staggered appearance
+            setTimeout(() => {
+                dot.style.transition = "transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.3s ease, box-shadow 0.3s ease, opacity 0.5s ease";
+                dot.style.opacity = "1";
+            }, i * 10);
+            
+            dot.addEventListener("mousedown", function(e) {
+                e.preventDefault(); // Prevent text selection
+                isDrawing = true;
+                selectedDots = [dot];
+                dot.classList.add("active");
+                
+                // Add haptic-like feedback with subtle animation
+                dot.style.transform = "scale(1.6)";
+                setTimeout(() => {
+                    if (dot.classList.contains("active")) {
+                        dot.style.transform = "scale(1.5)";
+                    }
+                }, 100);
+            });
+            
+            dot.addEventListener("mouseenter", function() {
+                if (isDrawing && !selectedDots.includes(dot)) {
+                    dot.classList.add("active");
+                    selectedDots.push(dot);
+                    if (selectedDots.length > 1) {
+                        let line = connectDots(selectedDots[selectedDots.length - 2], dot);
+                        lines.push(line);
+                    }
+                }
+            });
+        }
+        
+        document.addEventListener("mouseup", function() {
+            if (isDrawing) {
+                isDrawing = false;
+                document.querySelectorAll(".dot.active").forEach(d => {
+                    d.classList.remove("active");
+                    d.style.transform = "";
+                });
+            }
+        });
+        
+        document.addEventListener("mouseleave", function() {
+            if (isDrawing) {
+                isDrawing = false;
+                document.querySelectorAll(".dot.active").forEach(d => {
+                    d.classList.remove("active");
+                    d.style.transform = "";
+                });
+            }
+        });
+        
+        clearButton.addEventListener("click", function() {
+            this.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                this.style.transform = "";
+            }, 100);
+            
+            clearAllLines();
+        });
+        
+        function connectDots(dot1, dot2) {
+            const rect1 = dot1.getBoundingClientRect();
+            const rect2 = dot2.getBoundingClientRect();
+            const x1 = rect1.left + rect1.width / 2;
+            const y1 = rect1.top + rect1.height / 2;
+            const x2 = rect2.left + rect2.width / 2;
+            const y2 = rect2.top + rect2.height / 2;
+            const length = Math.hypot(x2 - x1, y2 - y1);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+            
+            const line = document.createElement("div");
+            line.className = "line";
+            line.style.width = "0px";
+            line.style.transform = `rotate(${angle}deg)`;
+            line.style.left = `${x1}px`;
+            line.style.top = `${y1}px`;
+            line.style.opacity = "0";
+            document.body.appendChild(line);
+            
+            // Force reflow for animation
+            line.getBoundingClientRect();
+            
+            // Animate line appearance
+            line.style.width = `${length}px`;
+            line.style.opacity = "1";
+            
+            return line;
+        }
+        
+        function clearAllLines() {
+            const allLines = document.querySelectorAll(".line");
+            allLines.forEach((line, index) => {
+                // Staggered disappearance
+                setTimeout(() => {
+                    line.style.opacity = "0";
+                    setTimeout(() => line.remove(), 300);
+                }, index * 30);
+            });
+            lines = [];
+        }
+        
+        // Add some "premium feel" features
+        grid.addEventListener("mousemove", function(e) {
+            // Subtle tilt effect based on mouse position
+            const bounds = this.getBoundingClientRect();
+            const x = e.clientX - bounds.left - bounds.width / 2;
+            const y = e.clientY - bounds.top - bounds.height / 2;
+            const tiltX = y / 30;
+            const tiltY = -x / 30;
+            
+            this.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateY(-5px)`;
+        });
+        
+        grid.addEventListener("mouseleave", function() {
+            // Reset tilt when mouse leaves
+            this.style.transition = "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)";
+            this.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(-5px)";
+        });
+    </script>
+</body>
+</html>
