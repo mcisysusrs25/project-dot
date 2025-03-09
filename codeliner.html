@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Code Preview - Premium Edition</title>
+
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-primary: #1E1E2E;
+            --bg-secondary: #181825;
+            --text-primary: #CDD6F4;
+            --text-secondary: #A6ADC8;
+            --accent-primary: #89B4FA;
+            --accent-secondary: #74C7EC;
+            --highlight-color: rgba(166, 227, 161, 0.3);
+            --highlight-border: #A6E3A1;
+            --button-primary: #89B4FA;
+            --button-secondary: #74C7EC;
+            --button-danger: #F38BA8;
+            --button-success: #A6E3A1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            color: var(--accent-primary);
+        }
+
+        .code-wrapper {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            height: 100%;
+            overflow: auto;
+            padding: 1rem;
+            margin: 0;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            counter-reset: line;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            tab-size: 4;
+        }
+
+        .line {
+            display: block;
+            position: relative;
+            padding-left: 3.5rem;
+            min-height: 1.6em;
+        }
+
+        .line::before {
+            content: counter(line);
+            counter-increment: line;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3rem;
+            text-align: right;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            user-select: none;
+        }
+
+        .highlight-line {
+            background-color: var(--highlight-color);
+            border-left: 3px solid var(--highlight-border);
+            margin-left: -3px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--button-primary);
+            color: var(--bg-primary);
+            font-family: 'Fira Code', monospace;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background-color: var(--button-secondary);
+        }
+
+        .btn-danger {
+            background-color: var(--button-danger);
+        }
+
+        .btn-success {
+            background-color: var(--button-success);
+        }
+
+        .btn i {
+            font-size: 0.9rem;
+        }
+
+        .line-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--bg-primary);
+            border-radius: 6px;
+            font-weight: 500;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            width: 80%;
+            max-width: 700px;
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-50px);
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--button-danger);
+        }
+
+        .modal-body {
+            margin-bottom: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 0.75rem;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            resize: vertical;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(137, 180, 250, 0.3);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.75rem 1.25rem;
+            background-color: var(--button-success);
+            color: var(--bg-primary);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 200;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dark-theme {
+            --bg-primary: #282A36;
+            --bg-secondary: #1E1F29;
+            --text-primary: #F8F8F2;
+            --text-secondary: #BFBFBF;
+            --accent-primary: #BD93F9;
+            --accent-secondary: #FF79C6;
+            --highlight-color: rgba(189, 147, 249, 0.2);
+            --highlight-border: #BD93F9;
+            --button-primary: #BD93F9;
+            --button-secondary: #FF79C6;
+            --button-danger: #FF5555;
+            --button-success: #50FA7B;
+        }
+
+        /* Animation for highlighting */
+        @keyframes highlight-pulse {
+            0% { background-color: var(--highlight-color); }
+            50% { background-color: rgba(166, 227, 161, 0.4); }
+            100% { background-color: var(--highlight-color); }
+        }
+
+        .highlight-animation {
+            animation: highlight-pulse 2s infinite;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 1rem;
+            }
+
+            .line::before {
+                width: 2rem;
+            }
+
+            .line {
+                padding-left: 2.5rem;
+            }
+
+            .controls {
+                padding: 0.75rem;
+                gap: 0.5rem;
+            }
+
+            .btn {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>Code Preview - Premium Edition</h1>
+            <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+
+        <div class="code-wrapper">
+            <pre id="code-container"><code class="language-python" id="code-display"></code></pre>
+        </div>
+
+        <div class="controls">
+            <button id="edit-btn" class="btn">
+                <i class="fas fa-edit"></i> Edit Code
+            </button>
+            <div id="line-info" class="line-info">Line: 1 of 0</div>
+            <button id="prev-btn" class="btn btn-secondary">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <button id="next-btn" class="btn btn-secondary">
+                <i class="fas fa-chevron-right"></i> Next
+            </button>
+            <button id="play-btn" class="btn btn-success" title="Auto-play through lines">
+                <i class="fas fa-play"></i> Play
+            </button>
+            <button id="export-btn" class="btn btn-danger">
+                <i class="fas fa-camera"></i> Snapshot
+            </button>
+        </div>
+    </div>
+
+    <!-- Code Edit Modal -->
+    <div id="code-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Code</h2>
+                <button id="modal-close" class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <textarea id="code-input" placeholder="Enter or paste your code here..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-btn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button id="submit-btn" class="btn btn-success">
+                    <i class="fas fa-check"></i> Apply
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast">Snapshot saved successfully!</div>
+
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <!-- html2canvas for capturing snapshots -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const codeDisplay = document.getElementById('code-display');
+            const codeContainer = document.getElementById('code-container');
+            const lineInfo = document.getElementById('line-info');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const playBtn = document.getElementById('play-btn');
+            const exportBtn = document.getElementById('export-btn');
+            const editBtn = document.getElementById('edit-btn');
+            const codeModal = document.getElementById('code-modal');
+            const codeInput = document.getElementById('code-input');
+            const submitBtn = document.getElementById('submit-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const modalClose = document.getElementById('modal-close');
+            const themeToggle = document.getElementById('theme-toggle');
+            const toast = document.getElementById('toast');
+            
+            // State variables
+            let codeLines = [];
+            let currentLine = 0;
+            let totalLines = 0;
+            let isPlaying = false;
+            let playInterval = null;
+            let isDarkTheme = false;
+
+            // Sample default code
+            const sampleCode = `def fibonacci(n):
+    """
+    Generate the Fibonacci sequence up to n terms.
+    
+    Args:
+        n (int): Number of terms to generate
+        
+    Returns:
+        list: The Fibonacci sequence
+    """
+    if n <= 0:
+        return []
+    elif n == 1:
+        return [0]
+    
+    sequence = [0, 1]
+    
+    while len(sequence) < n:
+        next_value = sequence[-1] + sequence[-2]
+        sequence.append(next_value)
+        
+    return sequence
+
+# Example usage
+result = fibonacci(10)
+print(f"Fibonacci sequence: {result}")
+
+# Calculate the sum
+total = sum(result)
+print(f"Sum of the sequence: {total}")`;
+
+            // Initialize the app
+            function init() {
+                loadSampleCode();
+                setupEventListeners();
+                checkThemePreference();
+            }
+
+            // Load sample code
+            function loadSampleCode() {
+                parseCode(sampleCode);
+                renderCode();
+            }
+
+            // Set up event listeners
+            function setupEventListeners() {
+                prevBtn.addEventListener('click', prevLine);
+                nextBtn.addEventListener('click', nextLine);
+                exportBtn.addEventListener('click', exportSnapshot);
+                editBtn.addEventListener('click', openCodeModal);
+                submitBtn.addEventListener('click', submitCode);
+                cancelBtn.addEventListener('click', closeCodeModal);
+                modalClose.addEventListener('click', closeCodeModal);
+                playBtn.addEventListener('click', togglePlay);
+                themeToggle.addEventListener('click', toggleTheme);
+                
+                // Close modal when clicking outside
+                window.addEventListener('click', (event) => {
+                    if (event.target === codeModal) {
+                        closeCodeModal();
+                    }
+                });
+
+                // Handle keyboard shortcuts
+                document.addEventListener('keydown', handleKeyboardShortcut);
+            }
+
+            // Parse the code into lines
+            function parseCode(code) {
+                codeLines = code.split('\n');
+                totalLines = codeLines.length;
+                currentLine = 0;
+                updateLineInfo();
+            }
+
+            // Render the code with syntax highlighting
+            function renderCode() {
+                // Clear the code container
+                codeDisplay.innerHTML = '';
+                
+                // Generate HTML for each line with line numbers
+                codeLines.forEach((line, index) => {
+                    const lineElement = document.createElement('span');
+                    lineElement.classList.add('line');
+                    lineElement.id = `line-${index}`;
+                    
+                    // Add highlight to current line
+                    if (index === currentLine) {
+                        lineElement.classList.add('highlight-line');
+                        lineElement.classList.add('highlight-animation');
+                    }
+                    
+                    // Apply syntax highlighting
+                    lineElement.innerHTML = Prism.highlight(line, Prism.languages.python, 'python');
+                    
+                    codeDisplay.appendChild(lineElement);
+                });
+                
+                // Scroll to highlighted line
+                scrollToHighlightedLine();
+            }
+
+            // Scroll to the highlighted line
+            function scrollToHighlightedLine() {
+                const highlightedLine = document.querySelector('.highlight-line');
+                if (highlightedLine) {
+                    highlightedLine.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
+
+            // Update line info display
+            function updateLineInfo() {
+                lineInfo.textContent = `Line: ${currentLine + 1} of ${totalLines}`;
+            }
+
+            // Move to the previous line
+            function prevLine() {
+                do {
+                    currentLine = (currentLine - 1 + totalLines) % totalLines;
+                } while (codeLines[currentLine].trim() === '' && totalLines > 1);
+                
+                renderCode();
+                updateLineInfo();
+            }
+
+            // Move to the next line
+            function nextLine() {
+                do {
+                    currentLine = (currentLine + 1) % totalLines;
+                } while (codeLines[currentLine].trim() === '' && totalLines > 1);
+                
+                renderCode();
+                updateLineInfo();
+            }
+
+            // Toggle auto-play
+            function togglePlay() {
+                if (isPlaying) {
+                    stopPlay();
+                } else {
+                    startPlay();
+                }
+            }
+
+            // Start auto-play
+            function startPlay() {
+                isPlaying = true;
+                playBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                playBtn.classList.remove('btn-success');
+                playBtn.classList.add('btn-danger');
+                
+                playInterval = setInterval(() => {
+                    nextLine();
+                }, 1500);
+            }
+
+            // Stop auto-play
+            function stopPlay() {
+                isPlaying = false;
+                clearInterval(playInterval);
+                playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
+                playBtn.classList.remove('btn-danger');
+                playBtn.classList.add('btn-success');
+            }
+
+            // Export the snapshot
+            function exportSnapshot() {
+                stopPlay(); // Make sure auto-play is stopped
+                
+                // Show the toast notification
+                showToast('Creating snapshot...');
+                
+                // Capture the snapshot of the code container
+                html2canvas(codeContainer, {
+                    backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary'),
+                    scale: 2 // Increase scale for better quality
+                }).then(canvas => {
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = `code_snapshot_line_${currentLine + 1}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Show success message
+                    showToast('Snapshot saved successfully!');
+                }).catch(error => {
+                    console.error('Error creating snapshot:', error);
+                    showToast('Error creating snapshot!', true);
+                });
+            }
+
+            // Show toast notification
+            function showToast(message, isError = false) {
+                toast.textContent = message;
+                
+                if (isError) {
+                    toast.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--button-danger');
+                } else {
+                    toast.style.backgroundColor = getComputedStyle(document.body).getPropertyValue('--button-success');
+                }
+                
+                toast.classList.add('show');
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            // Open code edit modal
+            function openCodeModal() {
+                codeInput.value = codeLines.join('\n');
+                codeModal.classList.add('show');
+                
+                // Focus the textarea and place cursor at the beginning
+                setTimeout(() => {
+                    codeInput.focus();
+                    codeInput.setSelectionRange(0, 0);
+                }, 100);
+            }
+
+            // Close code edit modal
+            function closeCodeModal() {
+                codeModal.classList.remove('show');
+            }
+
+            // Submit new code
+            function submitCode() {
+                const newCode = codeInput.value;
+                parseCode(newCode);
+                renderCode();
+                closeCodeModal();
+                showToast('Code updated successfully!');
+            }
+
+            // Handle keyboard shortcuts
+            function handleKeyboardShortcut(event) {
+                // Prevent default behavior for special keys
+                if (['ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key)) {
+                    event.preventDefault();
+                }
+
+                // Only process if modal is not open or it's Escape key
+                if (!codeModal.classList.contains('show') || event.key === 'Escape') {
+                    switch (event.key) {
+                        case 'ArrowLeft':
+                            prevLine();
+                            break;
+                        case 'ArrowRight':
+                            nextLine();
+                            break;
+                        case 'Escape':
+                            if (codeModal.classList.contains('show')) {
+                                closeCodeModal();
+                            } else if (isPlaying) {
+                                stopPlay();
+                            }
+                            break;
+                        case ' ':
+                            if (!codeModal.classList.contains('show')) {
+                                event.preventDefault();
+                                togglePlay();
+                            }
+                            break;
+                        case 'e':
+                        case 'E':
+                            if (event.ctrlKey && !codeModal.classList.contains('show')) {
+                                event.preventDefault();
+                                openCodeModal();
+                            }
+                            break;
+                        case 's':
+                        case 'S':
+                            if (event.ctrlKey && !codeModal.classList.contains('show')) {
+                                event.preventDefault();
+                                exportSnapshot();
+                            }
+                            break;
+                    }
+                }
+            }
+
+            // Toggle between light and dark themes
+            function toggleTheme() {
+                isDarkTheme = !isDarkTheme;
+                document.body.classList.toggle('dark-theme', isDarkTheme);
+                
+                // Update theme toggle icon
+                if (isDarkTheme) {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+                
+                // Save preference
+                localStorage.setItem('darkTheme', isDarkTheme);
+            }
+
+            // Check for saved theme preference
+            function checkThemePreference() {
+                const savedTheme = localStorage.getItem('darkTheme');
+                if (savedTheme === 'true') {
+                    isDarkTheme = true;
+                    document.body.classList.add('dark-theme');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                }
+            }
+
+            // Initialize the app
+            init();
+        });
+    </script>
+</body>
+
+</html>

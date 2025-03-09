@@ -1,0 +1,55 @@
+{
+    "experiences": [
+        {
+            "id": 1,
+            "title": "Professional Journey",
+            "description": "Key milestones in my career path",
+            "details": [
+                {
+                    "id": 1,
+                    "subtitle": "First Job",
+                    "text": "Started as a junior developer at TechInnovate Solutions, learning core programming skills"
+                },
+                {
+                    "id": 2,
+                    "subtitle": "Mid-Career Growth",
+                    "text": "Promoted to senior developer, leading critical project teams and mentoring junior staff"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "title": "Educational Background",
+            "description": "Academic achievements and learning experiences",
+            "details": [
+                {
+                    "id": 1,
+                    "subtitle": "Undergraduate Studies",
+                    "text": "Completed Bachelor's in Computer Science with honors from State University"
+                },
+                {
+                    "id": 2,
+                    "subtitle": "Continuing Education",
+                    "text": "Ongoing certifications in cloud computing and advanced software engineering"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "title": "Personal Projects",
+            "description": "Innovative side projects and personal achievements",
+            "details": [
+                {
+                    "id": 1,
+                    "subtitle": "Open Source Contribution",
+                    "text": "Developed an open-source library for data visualization, gaining 500+ GitHub stars"
+                },
+                {
+                    "id": 2,
+                    "subtitle": "Hackathon Success",
+                    "text": "Won first place in a regional hackathon with a machine learning project"
+                }
+            ]
+        }
+    ]
+}

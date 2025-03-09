@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Futuristic Dashboard with Audio Waveform</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+    
+    body {
+      background-color: #0a0a1a;
+      color: #ffffff;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .dashboard {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .panel {
+      background: rgba(30, 30, 60, 0.4);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 100, 255, 0.2);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px rgba(80, 80, 255, 0.1);
+      overflow: hidden;
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      color: #8f8fff;
+    }
+    
+    .panel-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Data Visualization Styles */
+    .bar-chart {
+      width: 100%;
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-bottom: 20px;
+    }
+    
+    .bar {
+      background: linear-gradient(to top, #4f4fff, #00ffff);
+      width: 8%;
+      height: 0;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.5s ease;
+    }
+    
+    .circle-chart {
+      position: relative;
+      width: 200px;
+      height: 200px;
+    }
+    
+    .circle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 8px solid;
+      border-color: #4f4fff #4f4fff transparent transparent;
+      transform: rotate(45deg);
+      animation: spin 3s linear infinite;
+    }
+    
+    .circle-inner {
+      position: absolute;
+      top: 20%;
+      left: 20%;
+      width: 60%;
+      height: 60%;
+      border-radius: 50%;
+      background: rgba(80, 80, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: #ffffff;
+    }
+    
+    .line-chart {
+      width: 100%;
+      height: 200px;
+      position: relative;
+    }
+    
+    .line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      stroke: #4f4fff;
+      stroke-width: 3;
+      fill: none;
+    }
+    
+    .grid {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+    }
+    
+    .grid-line {
+      border-bottom: 1px solid rgba(80, 80, 255, 0.1);
+    }
+    
+    .grid-line:last-child {
+      border-bottom: none;
+    }
+    
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    
+    .stat-box {
+      background: rgba(80, 80, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #ffffff;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: #8f8fff;
+    }
+    
+    /* Floating Audio Wave Button */
+    .wave-button-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+    }
+    
+    .wave-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(30, 30, 60, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(100, 100, 255, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(80, 80, 255, 0.5);
+      position: relative;
+    }
+    
+    .wave-button::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border-radius: 50%;
+      background: transparent;
+      border: 2px solid rgba(100, 100, 255, 0.5);
+      animation: pulse 2s infinite;
+    }
+    
+    .wave-button::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      border-radius: 50%;
+      background: transparent;
+      border: 2px solid rgba(100, 100, 255, 0.3);
+      animation: pulse 2s infinite 0.5s;
+    }
+    
+    .wave-bars {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30px;
+      width: 40px;
+      gap: 3px;
+    }
+    
+    .wave-bar {
+      width: 4px;
+      background: #4f4fff;
+      border-radius: 2px;
+      transform-origin: bottom;
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+      0% {
+        transform: scale(0.8);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.2);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(45deg);
+      }
+      100% {
+        transform: rotate(405deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="panel">
+      <div class="panel-header">
+        <span>Performance Metrics</span>
+        <span>Real-time</span>
+      </div>
+      <div class="panel-content">
+        <div class="bar-chart" id="barChart">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <span>System Status</span>
+        <span>98% Operational</span>
+      </div>
+      <div class="panel-content">
+        <div class="circle-chart">
+          <div class="circle"></div>
+          <div class="circle-inner">98%</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <span>Frequency Analysis</span>
+        <span>Last 24 hours</span>
+      </div>
+      <div class="panel-content">
+        <div class="line-chart">
+          <div class="grid">
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+          </div>
+          <svg class="line" viewBox="0 0 100 50">
+            <path id="linePath" d="M0,35 Q15,15 30,25 T60,15 T100,30"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <div class="panel">
+      <div class="panel-header">
+        <span>Summary Statistics</span>
+        <span>Updated Now</span>
+      </div>
+      <div class="panel-content">
+        <div class="stats">
+          <div class="stat-box">
+            <div class="stat-value" id="stat1">724</div>
+            <div class="stat-label">SIGNALS</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat2">98.2</div>
+            <div class="stat-label">QUALITY</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat3">3.7</div>
+            <div class="stat-label">LATENCY</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat4">112</div>
+            <div class="stat-label">ACTIVE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="wave-button-container">
+    <div class="wave-button" id="waveButton">
+      <div class="wave-bars">
+        <div class="wave-bar" id="waveBar1"></div>
+        <div class="wave-bar" id="waveBar2"></div>
+        <div class="wave-bar" id="waveBar3"></div>
+        <div class="wave-bar" id="waveBar4"></div>
+        <div class="wave-bar" id="waveBar5"></div>
+        <div class="wave-bar" id="waveBar6"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Animated Wave Button
+    const waveBars = document.querySelectorAll('.wave-bar');
+    let isPlaying = true;
+    
+    function animateWaveBars() {
+      waveBars.forEach((bar, index) => {
+        const time = Date.now() / 500;
+        const offset = index * 0.4;
+        const amplitude = Math.sin(time + offset) * 0.5 + 0.5;
+        const height = 5 + amplitude * 25;
+        
+        bar.style.height = `${height}px`;
+      });
+      
+      if (isPlaying) {
+        requestAnimationFrame(animateWaveBars);
+      }
+    }
+    
+    // Bar Chart Animation
+    const bars = document.querySelectorAll('.bar-chart .bar');
+    
+    function animateBarChart() {
+      bars.forEach((bar, index) => {
+        const time = Date.now() / 1500;
+        const offset = index * 0.2;
+        const amplitude = Math.sin(time + offset) * 0.4 + 0.6;
+        const height = amplitude * 100;
+        
+        bar.style.height = `${height}%`;
+      });
+      
+      requestAnimationFrame(animateBarChart);
+    }
+    
+    // Line Chart Animation
+    const linePath = document.getElementById('linePath');
+    
+    function animateLineChart() {
+      const time = Date.now() / 2000;
+      let path = "M0,35 ";
+      
+      for (let i = 0; i < 10; i++) {
+        const x = i * 10;
+        const y = 25 + Math.sin(time + i * 0.5) * 15;
+        
+        if (i === 0) {
+          path += `M${x},${y} `;
+        } else {
+          path += `Q${x-5},${25 + Math.sin(time + (i-0.5) * 0.5) * 15} ${x},${y} `;
+        }
+      }
+      
+      linePath.setAttribute('d', path);
+      requestAnimationFrame(animateLineChart);
+    }
+    
+    // Stats Counter Animation
+    const statElements = [
+      document.getElementById('stat1'),
+      document.getElementById('stat2'),
+      document.getElementById('stat3'),
+      document.getElementById('stat4')
+    ];
+    
+    const statValues = [
+      { min: 720, max: 730 },
+      { min: 97.8, max: 98.6, decimals: 1 },
+      { min: 3.5, max: 3.9, decimals: 1 },
+      { min: 110, max: 115 }
+    ];
+    
+    function animateStats() {
+      statElements.forEach((element, index) => {
+        const value = statValues[index];
+        const randomValue = Math.random() * (value.max - value.min) + value.min;
+        
+        if (value.decimals) {
+          element.textContent = randomValue.toFixed(value.decimals);
+        } else {
+          element.textContent = Math.round(randomValue);
+        }
+      });
+      
+      setTimeout(animateStats, 2000);
+    }
+    
+    // Wave Button Toggle
+    const waveButton = document.getElementById('waveButton');
+    
+    waveButton.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      
+      if (isPlaying) {
+        animateWaveBars();
+        waveButton.style.boxShadow = '0 0 20px rgba(80, 80, 255, 0.5)';
+      } else {
+        waveBars.forEach(bar => {
+          bar.style.height = '5px';
+        });
+        waveButton.style.boxShadow = '0 0 20px rgba(255, 80, 80, 0.5)';
+      }
+    });
+    
+    // Initialize animations
+    animateWaveBars();
+    animateBarChart();
+    animateLineChart();
+    animateStats();
+  </script>
+</body>
+</html>

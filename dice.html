@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dice Image Mosaic Generator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #121212;
+      color: #f5f5f5;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #f5f5f5;
+    }
+    
+    p {
+      text-align: center;
+      margin-bottom: 20px;
+      max-width: 600px;
+      opacity: 0.8;
+    }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 800px;
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: space-between;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #bbb;
+    }
+    
+    button, input[type="file"] {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #444;
+    }
+    
+    #generateBtn {
+      background-color: #2b5797;
+      padding: 12px 20px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    #generateBtn:hover {
+      background-color: #3a6ab7;
+    }
+    
+    .canvas-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    canvas {
+      border: 1px solid #444;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+      max-width: 100%;
+    }
+    
+    .preview {
+      max-width: 300px;
+      border: 1px solid #444;
+      display: block;
+      margin-top: 10px;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      background: #333;
+      height: 8px;
+      border-radius: 4px;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      background: #2b5797;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    .value-display {
+      font-size: 14px;
+      color: #bbb;
+      width: 40px;
+      text-align: center;
+    }
+    
+    .range-with-value {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+        .sample-image:hover {
+      border-color: #2b5797;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 15px;
+    }
+    
+    .tab-btn {
+      background-color: #333;
+      color: #bbb;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+    }
+    
+    .tab-btn.active {
+      background-color: #2b5797;
+      color: white;
+    }
+    
+    #downloadBtn {
+      background-color: #097969;
+      margin-top: 15px;
+    }
+    
+    #downloadBtn:hover {
+      background-color: #0a9a88;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dice Image Mosaic Generator</h1>
+  <p>Upload an image and convert it to a dice mosaic where each die represents a pixel in your image.</p>
+  
+  <div class="controls">
+    <div class="input-group">
+      <label for="imageUpload">Upload an image:</label>
+      <input type="file" id="imageUpload" accept="image/*">
+      
+    </div>
+    
+    <div class="row">
+      <div class="input-group" style="flex: 1;">
+        <label for="gridSizeSlider">Grid Size: <span id="gridSizeValue">20</span></label>
+        <div class="range-with-value">
+          <input type="range" id="gridSizeSlider" min="10" max="1000" value="20">
+          <span class="value-display" id="gridSizeDisplay">1000</span>
+        </div>
+      </div>
+      
+      <div class="input-group" style="flex: 1;">
+        <label for="diceSizeSlider">Dice Size: <span id="diceSizeValue">40</span></label>
+        <div class="range-with-value">
+          <input type="range" id="diceSizeSlider" min="20" max="80" value="40">
+          <span class="value-display" id="diceSizeDisplay">40</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="input-group" style="flex: 1;">
+        <label for="contrastSlider">Contrast: <span id="contrastValue">1.0</span></label>
+        <div class="range-with-value">
+          <input type="range" id="contrastSlider" min="0.5" max="2.5" step="0.1" value="1.0">
+          <span class="value-display" id="contrastDisplay">1.0</span>
+        </div>
+      </div>
+      
+      <div class="input-group" style="flex: 1;">
+        <label for="brightnessSlider">Brightness: <span id="brightnessValue">1.0</span></label>
+        <div class="range-with-value">
+          <input type="range" id="brightnessSlider" min="0.5" max="1.5" step="0.1" value="1.0">
+          <span class="value-display" id="brightnessDisplay">1.0</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tab-buttons">
+      <button class="tab-btn active" id="lightDiceBtn">Light Dice</button>
+      <button class="tab-btn" id="darkDiceBtn">Dark Dice</button>
+    </div>
+    
+    <button id="generateBtn">Generate Dice Mosaic</button>
+  </div>
+  
+  <div class="canvas-container">
+    <canvas id="diceCanvas" width="1000" height="1000"></canvas>
+    <button id="downloadBtn">Download as PNG</button>
+  </div>
+  
+  <script>
+    const canvas = document.getElementById("diceCanvas");
+    const ctx = canvas.getContext("2d");
+    
+    // Default settings
+    let gridSize = 20;
+    let diceSize = 40;
+    let margin = 20;
+    let contrast = 1.0;
+    let brightness = 1.0;
+    let isDarkTheme = false;
+    let sourceImage = null;
+    
+    // Default sample images - would normally use real images but using placeholders here
+    const sampleImages = [
+      "/api/placeholder/400/400", // replace with actual image URLs
+      "/api/placeholder/400/400",
+      "/api/placeholder/400/400"
+    ];
+    
+    // DOM element references
+    const gridSizeSlider = document.getElementById("gridSizeSlider");
+    const diceSizeSlider = document.getElementById("diceSizeSlider");
+    const contrastSlider = document.getElementById("contrastSlider");
+    const brightnessSlider = document.getElementById("brightnessSlider");
+    const gridSizeDisplay = document.getElementById("gridSizeDisplay");
+    const diceSizeDisplay = document.getElementById("diceSizeDisplay");
+    const contrastDisplay = document.getElementById("contrastDisplay");
+    const brightnessDisplay = document.getElementById("brightnessDisplay");
+    const generateBtn = document.getElementById("generateBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const imageUpload = document.getElementById("imageUpload");
+    const lightDiceBtn = document.getElementById("lightDiceBtn");
+    const darkDiceBtn = document.getElementById("darkDiceBtn");
+    
+    // Initialize canvas with default pattern
+    function initCanvas() {
+      const totalWidth = margin * 2 + gridSize * diceSize;
+      const totalHeight = margin * 2 + gridSize * diceSize;
+      
+      canvas.width = totalWidth;
+      canvas.height = totalHeight;
+      
+      // Fill with a background
+      ctx.fillStyle = isDarkTheme ? "#000" : "#FFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw random dice if no image is loaded
+      if (!sourceImage) {
+        drawRandomDiceGrid();
+      }
+    }
+    
+    // Function to convert image to dice values
+    function processImage(img) {
+      // Create a temporary canvas to process the image
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      
+      // Calculate aspect ratio and resize
+      let width = gridSize;
+      let height = gridSize;
+      
+      // Adjust if image has different proportions
+      const imgRatio = img.width / img.height;
+      if (imgRatio > 1) {
+        // Landscape
+        height = Math.floor(width / imgRatio);
+      } else {
+        // Portrait
+        width = Math.floor(height * imgRatio);
+      }
+      
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      
+      // Draw and resize image to fit grid
+      tempCtx.drawImage(img, 0, 0, width, height);
+      
+      // Adjust contrast and brightness
+      if (contrast !== 1.0 || brightness !== 1.0) {
+        const imageData = tempCtx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+          // Apply brightness
+          data[i] = Math.min(255, data[i] * brightness);
+          data[i+1] = Math.min(255, data[i+1] * brightness);
+          data[i+2] = Math.min(255, data[i+2] * brightness);
+          
+          // Apply contrast
+          for (let j = 0; j < 3; j++) {
+            data[i+j] = ((data[i+j] / 255 - 0.5) * contrast + 0.5) * 255;
+            data[i+j] = Math.max(0, Math.min(255, data[i+j]));
+          }
+        }
+        
+        tempCtx.putImageData(imageData, 0, 0);
+      }
+      
+      // Create a matrix to hold the dice values
+      const diceMatrix = [];
+      
+      // Extract pixel data for the entire image
+      const imageData = tempCtx.getImageData(0, 0, width, height);
+      const pixels = imageData.data;
+      
+      // For each pixel, calculate brightness and map to dice value (1-6)
+      for (let y = 0; y < height; y++) {
+        const row = [];
+        for (let x = 0; x < width; x++) {
+          const index = (y * width + x) * 4;
+          
+          // Calculate grayscale value from RGB
+          const grayscale = (pixels[index] + pixels[index+1] + pixels[index+2]) / 3;
+          
+          // Map grayscale value to dice number (1-6)
+          // If dark theme, we invert the mapping (more dots = darker area)
+          let diceValue;
+          if (isDarkTheme) {
+            // Map 0-255 to 6-1 (darker areas get more dots)
+            diceValue = 7 - Math.ceil(grayscale / 255 * 6);
+          } else {
+            // Map 0-255 to 1-6 (lighter areas get more dots)
+            diceValue = Math.ceil(grayscale / 255 * 6);
+          }
+          
+          row.push(diceValue);
+        }
+        diceMatrix.push(row);
+      }
+      
+      return {
+        matrix: diceMatrix,
+        width: width,
+        height: height
+      };
+    }
+    
+    // Draw the dice grid based on the image data
+    function drawDiceGridFromImage(imageData) {
+      // Clear canvas with background
+      ctx.fillStyle = isDarkTheme ? "#000" : "#FFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Center the image on canvas
+      const startX = (canvas.width - imageData.width * diceSize) / 2;
+      const startY = (canvas.height - imageData.height * diceSize) / 2;
+      
+      // Draw each dice based on the computed matrix
+      for (let row = 0; row < imageData.height; row++) {
+        for (let col = 0; col < imageData.width; col++) {
+          const diceNumber = imageData.matrix[row][col];
+          
+          // Calculate dice position
+          const x = startX + col * diceSize;
+          const y = startY + row * diceSize;
+          
+          // Draw the dice
+          drawDice(x, y, diceNumber);
+        }
+      }
+    }
+    
+    // Draw random dice grid (for initial display)
+    function drawRandomDiceGrid() {
+      for (let row = 0; row < gridSize; row++) {
+        for (let col = 0; col < gridSize; col++) {
+          // Generate a random number for each dice face (1 to 6)
+          const diceNumber = Math.floor(Math.random() * 6) + 1;
+          
+          // Calculate dice position with margin
+          const x = margin + col * diceSize;
+          const y = margin + row * diceSize;
+          
+          // Draw dice
+          drawDice(x, y, diceNumber);
+        }
+      }
+    }
+    
+    // Function to draw a single dice
+    function drawDice(x, y, number) {
+      const faceColor = isDarkTheme ? '#333' : '#f0f0f0';
+      const shadowColor = isDarkTheme ? '#222' : '#ddd';
+      const dotColor = isDarkTheme ? '#FFF' : '#333';
+      const borderColor = isDarkTheme ? '#444' : '#ccc';
+      
+      // Create a 3D effect by drawing a shadow rectangle
+      ctx.fillStyle = shadowColor;
+      ctx.fillRect(x + 2, y + 2, diceSize - 4, diceSize - 4);
+      
+      // Draw the dice face (a rounded square)
+      ctx.fillStyle = faceColor;
+      
+      // Rounded rectangle
+      const radius = diceSize / 10;
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + diceSize - radius, y);
+      ctx.quadraticCurveTo(x + diceSize, y, x + diceSize, y + radius);
+      ctx.lineTo(x + diceSize, y + diceSize - radius);
+      ctx.quadraticCurveTo(x + diceSize, y + diceSize, x + diceSize - radius, y + diceSize);
+      ctx.lineTo(x + radius, y + diceSize);
+      ctx.quadraticCurveTo(x, y + diceSize, x, y + diceSize - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Draw border
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // Draw the dots based on the dice number
+      ctx.fillStyle = dotColor;
+      const dotSize = Math.max(2, diceSize / 10); // Minimum dot size of 2px
+      
+      // Calculate positions for dots
+      const midX = x + diceSize / 2;
+      const midY = y + diceSize / 2;
+      const offset = diceSize / 3.5; // Adjust spacing between dots
+      
+      if (number === 1) {
+        drawDot(midX, midY, dotSize);
+      } else if (number === 2) {
+        drawDot(midX - offset, midY - offset, dotSize);
+        drawDot(midX + offset, midY + offset, dotSize);
+      } else if (number === 3) {
+        drawDot(midX - offset, midY - offset, dotSize);
+        drawDot(midX, midY, dotSize);
+        drawDot(midX + offset, midY + offset, dotSize);
+      } else if (number === 4) {
+        drawDot(midX - offset, midY - offset, dotSize);
+        drawDot(midX - offset, midY + offset, dotSize);
+        drawDot(midX + offset, midY - offset, dotSize);
+        drawDot(midX + offset, midY + offset, dotSize);
+      } else if (number === 5) {
+        drawDot(midX - offset, midY - offset, dotSize);
+        drawDot(midX - offset, midY + offset, dotSize);
+        drawDot(midX, midY, dotSize);
+        drawDot(midX + offset, midY - offset, dotSize);
+        drawDot(midX + offset, midY + offset, dotSize);
+      } else if (number === 6) {
+        drawDot(midX - offset, midY - offset, dotSize);
+        drawDot(midX - offset, midY, dotSize);
+        drawDot(midX - offset, midY + offset, dotSize);
+        drawDot(midX + offset, midY - offset, dotSize);
+        drawDot(midX + offset, midY, dotSize);
+        drawDot(midX + offset, midY + offset, dotSize);
+      }
+    }
+    
+    // Helper function to draw a dot
+    function drawDot(x, y, radius) {
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Event listeners
+    gridSizeSlider.addEventListener("input", function() {
+      gridSize = parseInt(this.value);
+      gridSizeDisplay.textContent = gridSize;
+      initCanvas();
+    });
+    
+    diceSizeSlider.addEventListener("input", function() {
+      diceSize = parseInt(this.value);
+      diceSizeDisplay.textContent = diceSize;
+      initCanvas();
+    });
+    
+    contrastSlider.addEventListener("input", function() {
+      contrast = parseFloat(this.value);
+      contrastDisplay.textContent = contrast.toFixed(1);
+    });
+    
+    brightnessSlider.addEventListener("input", function() {
+      brightness = parseFloat(this.value);
+      brightnessDisplay.textContent = brightness.toFixed(1);
+    });
+    
+    lightDiceBtn.addEventListener("click", function() {
+      isDarkTheme = false;
+      lightDiceBtn.classList.add("active");
+      darkDiceBtn.classList.remove("active");
+      generateImage();
+    });
+    
+    darkDiceBtn.addEventListener("click", function() {
+      isDarkTheme = true;
+      darkDiceBtn.classList.add("active");
+      lightDiceBtn.classList.remove("active");
+      generateImage();
+    });
+    
+    // Handle image upload
+    imageUpload.addEventListener("change", function(e) {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+            sourceImage = img;
+            generateImage();
+          }
+          img.src = event.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    });
+    
+    // Sample image handlers
+    document.getElementById("sample1").addEventListener("click", function() {
+      loadSampleImage(0);
+    });
+    
+    document.getElementById("sample2").addEventListener("click", function() {
+      loadSampleImage(1);
+    });
+    
+    document.getElementById("sample3").addEventListener("click", function() {
+      loadSampleImage(2);
+    });
+    
+    function loadSampleImage(index) {
+      const img = new Image();
+      img.onload = function() {
+        sourceImage = img;
+        generateImage();
+      }
+      img.src = sampleImages[index];
+    }
+    
+    // Generate button handler
+    generateBtn.addEventListener("click", generateImage);
+    
+    function generateImage() {
+      // Reset canvas dimensions based on current settings
+      const totalWidth = margin * 2 + gridSize * diceSize;
+      const totalHeight = margin * 2 + gridSize * diceSize;
+      
+      canvas.width = totalWidth;
+      canvas.height = totalHeight;
+      
+      if (sourceImage) {
+        // Process the image and create dice matrix
+        const imageData = processImage(sourceImage);
+        
+        // Draw the dice grid based on processed image
+        drawDiceGridFromImage(imageData);
+      } else {
+        // If no image, just draw random dice
+        ctx.fillStyle = isDarkTheme ? "#000" : "#FFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        drawRandomDiceGrid();
+      }
+    }
+    
+    // Download function
+    downloadBtn.addEventListener("click", function() {
+      const link = document.createElement('a');
+      link.download = 'dice-mosaic.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+    
+    // Initialize on load
+    window.onload = function() {
+      initCanvas();
+    };
+  </script>
+</body>
+</html>
